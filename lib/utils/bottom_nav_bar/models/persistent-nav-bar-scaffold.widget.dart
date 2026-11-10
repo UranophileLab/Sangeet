@@ -297,7 +297,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView>
   final List<bool> shouldBuildTab = <bool>[];
   final List<FocusScopeNode> tabFocusNodes = <FocusScopeNode>[];
   final List<FocusScopeNode> discardedNodes = <FocusScopeNode>[];
-  late List<AnimationController?> _animationControllers;
+  List<AnimationController?> _animationControllers = [];
   late List<Animation<double>?> _animations;
   int? _tabCount;
   int? _lastIndex;
@@ -324,6 +324,9 @@ class _TabSwitchingViewState extends State<_TabSwitchingView>
   }
 
   _initAniamtionControllers() {
+    for (AnimationController? controller in _animationControllers) {
+      controller?.dispose();
+    }
     if (widget.screenTransitionAnimation!.animateTabTransition) {
       _animationControllers =
           List<AnimationController?>.filled(widget.tabCount!, null);
@@ -483,10 +486,8 @@ class _TabSwitchingViewState extends State<_TabSwitchingView>
     for (FocusScopeNode focusScopeNode in discardedNodes) {
       focusScopeNode.dispose();
     }
-    if (widget.screenTransitionAnimation!.animateTabTransition) {
-      for (AnimationController? controller in _animationControllers) {
-        controller?.dispose();
-      }
+    for (AnimationController? controller in _animationControllers) {
+      controller?.dispose();
     }
     super.dispose();
   }

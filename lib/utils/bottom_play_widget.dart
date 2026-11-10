@@ -21,6 +21,9 @@ class PlayWidget extends StatelessWidget {
     final devicePexelRatio = MediaQuery.of(context).devicePixelRatio;
 
     return con.player.builderCurrent(builder: (context, playing) {
+      if (playing.audio.assetAudioPath.isEmpty) {
+        return const SizedBox.shrink();
+      }
       final myAudio = con.find(con.audios, playing.audio.assetAudioPath);
       final cover = (myAudio.metas.image != null && myAudio.metas.image!.path.isNotEmpty)
           ? myAudio.metas.image!.path
@@ -57,7 +60,7 @@ class PlayWidget extends StatelessWidget {
                   ),
                 ),
                 BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 200, sigmaY: 200),
+                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                         vertical: 4.0, horizontal: 8),

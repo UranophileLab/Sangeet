@@ -66,7 +66,7 @@ class _PositionSeekWidgetState extends State<PositionSeekWidget> {
                       _visibleValue = target;
                     });
                     widget.seekTo(target);
-                    Future.delayed(const Duration(milliseconds: 1000), () {
+                    Future.delayed(const Duration(milliseconds: 300), () {
                       if (mounted) {
                         setState(() {
                           listenOnlyUserInterraction = false;
@@ -97,7 +97,10 @@ class _PositionSeekWidgetState extends State<PositionSeekWidget> {
             children: [
               SizedBox(
                 width: 40,
-                child: Text(durationToString(widget.currentPosition),
+                child: Text(
+                    durationToString(listenOnlyUserInterraction
+                        ? _visibleValue
+                        : widget.currentPosition),
                     style: const TextStyle(color: Colors.white, fontSize: 12)),
               ),
               SizedBox(

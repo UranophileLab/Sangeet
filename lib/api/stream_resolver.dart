@@ -4,7 +4,6 @@ import '../audio/url_refresh.dart';
 import 'dto.dart';
 import 'local_media_channel.dart';
 import 'lossless_api.dart';
-import 'ytmusic_channel.dart';
 
 enum StreamQuality { auto, high, data, lossless }
 
@@ -91,19 +90,6 @@ class StreamResolver {
       if (hit != null) {
         return _store(song.id, ResolvedStream(hit.url), expiry: hit.expiresAt);
       }
-    }
-
-    if (song.source == 'youtube') {
-      final yt = await YtMusicChannel.instance.resolve(
-        song.id,
-        quality: _qualityParam(),
-      );
-      if (yt == null) {
-        throw StreamResolveException(
-          'No playable stream for "${song.title}" (${song.id}).',
-        );
-      }
-      return ResolvedStream(yt.url, httpHeaders: yt.headers);
     }
 
     if (!forceRefresh) {

@@ -65,12 +65,16 @@ class _OffsetAnimationState extends State<OffsetAnimation>
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (_hideNavigationBar != null ||
-        _hideNavigationBar != widget.hideNavigationBar) {
+  void didUpdateWidget(OffsetAnimation oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_hideNavigationBar != widget.hideNavigationBar) {
       _hideNavigationBar = widget.hideNavigationBar;
       _hideAnimation();
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _navBarOffsetAnimation,
       child: widget.child,

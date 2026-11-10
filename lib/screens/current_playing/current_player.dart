@@ -51,7 +51,7 @@ class _CurrentPlayerState extends State<CurrentPlayer> {
 
               return ClipRect(
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 300, sigmaY: 300),
+                  filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
                   child: Container(
                     decoration: const BoxDecoration(
                       color: Colors.black87,
@@ -61,265 +61,297 @@ class _CurrentPlayerState extends State<CurrentPlayer> {
                         colors: [Colors.black, Colors.black, Colors.black45],
                       ),
                     ),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                        Column(
-                          children: [
-                            const SizedBox(
-                              height: 30,
-                            ),
-                            SafeArea(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 8.0, horizontal: 12),
-                                child: Row(
-                                  children: [
-                                    IconButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      icon: const Icon(
-                                        Icons.arrow_back_ios,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Center(
-                                        child: Column(
-                                          children: [
-                                            const Text(
-                                              "NOW PLAYING",
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                            const SizedBox(
-                                              height: 4,
-                                            ),
-                                            Text(
-                                              artist,
-                                              style: const TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: () {
-                                        showModalBottomSheet(
-                                            useRootNavigator: true,
-                                            isScrollControlled: true,
-                                            elevation: 100,
-                                            backgroundColor: Colors.black38,
-                                            context: context,
-                                            builder: (context) {
-                                              return BottomSheetWidget(
-                                                  con: widget.con,
-                                                  isNext: true,
-                                                  song: SongModel(
-                                                    songid: id,
-                                                    songname: title,
-                                                    userid: album,
-                                                    trackid: myAudio.path,
-                                                    duration: '',
-                                                    coverImageUrl: cover,
-                                                    name: artist,
-                                                  ));
-                                            });
-                                      },
-                                      icon: const Icon(
-                                        Icons.more_vert,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 26.0),
-                          child: AspectRatio(
-                            aspectRatio: 1,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(3),
-                              child: CachedNetworkImage(
-                                imageUrl: cover,
-                                fit: BoxFit.cover,
-                                memCacheHeight:
-                                    (200 * devicePexelRatio).round(),
-                                memCacheWidth: (200 * devicePexelRatio).round(),
-                                maxHeightDiskCache:
-                                    (200 * devicePexelRatio).round(),
-                                maxWidthDiskCache:
-                                    (200 * devicePexelRatio).round(),
-                                progressIndicatorBuilder: (context, url, l) =>
-                                    const LoadingImage(
-                                  icon: Icon(
-                                    LineIcons.compactDisc,
-                                    size: 120,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 20),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 24.0),
-                                        child: Text(
-                                          title,
-                                          maxLines: 1,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .headlineMedium,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 5),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 24.0),
-                                        child: Text(
-                                          artist,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyLarge!
-                                              .copyWith(color: Colors.grey),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                LikeButton(
-                                  name: title,
-                                  fullname: artist,
-                                  username: album,
-                                  id: id,
-                                  track: myAudio.path,
-                                  isIcon: false,
-                                  cover: cover,
-                                ),
-                                const SizedBox(width: 24)
-                              ],
-                            ),
-                            Column(children: <Widget>[
-                              widget.con.player.builderRealtimePlayingInfos(
-                                  builder:
-                                      (context, RealtimePlayingInfos? infos) {
-                                if (infos == null) {
-                                  return PositionSeekWidget(
-                                    currentPosition: const Duration(seconds: 0),
-                                    duration:
-                                        const Duration(minutes: 3, seconds: 23),
-                                    seekTo: (to) {},
-                                  );
-                                }
-                                return PositionSeekWidget(
-                                  currentPosition: infos.currentPosition,
-                                  duration: infos.duration,
-                                  seekTo: (to) {
-                                    widget.con.seek(to);
-                                  },
-                                );
-                              }),
-                              widget.con.player.builderLoopMode(
-                                builder: (context, loopMode) {
-                                  return PlayerBuilder.isPlaying(
-                                      player: widget.con.player,
-                                      builder: (context, isPlaying) {
-                                        return PlayingControls(
-                                          loopMode: loopMode,
-                                          isPlaying: isPlaying,
-                                          con: widget.con,
-                                          isPlaylist: true,
-                                          onStop: () {
-                                            widget.con.player.stop();
-                                          },
-                                          toggleLoop: () {
-                                            widget.con.player.toggleLoop();
-                                          },
-                                          onPlay: () {
-                                            widget.con.player.playOrPause();
-                                          },
-                                          onNext: () {
-                                            widget.con.playNext();
-                                          },
-                                          onPrevious: () {
-                                            widget.con.playPrevious();
-                                          },
-                                        );
-                                      });
-                                },
-                              ),
-                              const SizedBox(height: 20),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 26.0),
-                                child: Row(
+                    child: SafeArea(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          return CustomScrollView(
+                            physics: const BouncingScrollPhysics(),
+                            slivers: [
+                              SliverFillRemaining(
+                                hasScrollBody: false,
+                                child: Column(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    InkWell(
-                                      onTap: () {
-                                        launchUrlString(myAudio.path);
-                                      },
-                                      child: const Icon(
-                                        Icons.download_sharp,
-                                        color: Colors.grey,
-                                        size: 18,
-                                      ),
-                                    ),
-                                    InkWell(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          CupertinoPageRoute(
-                                            builder: (context) =>
-                                                PlayListWidget(
-                                              audios: widget.con.player.playlist
-                                                      ?.audios ??
-                                                  widget.con.audios,
-                                              con: widget.con,
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          top: 32.0, bottom: 8.0, left: 12.0, right: 12.0),
+                                      child: Row(
+                                        children: [
+                                          IconButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                            icon: const Icon(
+                                              Icons.arrow_back_ios,
+                                              color: Colors.white,
                                             ),
                                           ),
-                                        );
-                                      },
-                                      child: const Icon(
-                                        CupertinoIcons.music_note_list,
-                                        color: Colors.grey,
-                                        size: 18,
+                                          Expanded(
+                                            child: Center(
+                                              child: Column(
+                                                children: [
+                                                  const Text(
+                                                    "NOW PLAYING",
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(
+                                                    height: 4,
+                                                  ),
+                                                  Text(
+                                                    artist,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      color: Colors.grey,
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          IconButton(
+                                            onPressed: () {
+                                              showModalBottomSheet(
+                                                  useRootNavigator: true,
+                                                  isScrollControlled: true,
+                                                  elevation: 100,
+                                                  backgroundColor:
+                                                      Colors.black38,
+                                                  context: context,
+                                                  builder: (context) {
+                                                    return BottomSheetWidget(
+                                                        con: widget.con,
+                                                        isNext: true,
+                                                        song: SongModel(
+                                                          songid: id,
+                                                          songname: title,
+                                                          userid: album,
+                                                          trackid: myAudio.path,
+                                                          duration: '',
+                                                          coverImageUrl: cover,
+                                                          name: artist,
+                                                        ));
+                                                  });
+                                            },
+                                            icon: const Icon(
+                                              Icons.more_vert,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
                                       ),
+                                    ),
+                                    const Spacer(),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 26.0),
+                                      child: AspectRatio(
+                                        aspectRatio: 1,
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(3),
+                                          child: CachedNetworkImage(
+                                            imageUrl: cover,
+                                            fit: BoxFit.cover,
+                                            memCacheHeight:
+                                                (200 * devicePexelRatio)
+                                                    .round(),
+                                            memCacheWidth:
+                                                (200 * devicePexelRatio)
+                                                    .round(),
+                                            maxHeightDiskCache:
+                                                (200 * devicePexelRatio)
+                                                    .round(),
+                                            maxWidthDiskCache:
+                                                (200 * devicePexelRatio)
+                                                    .round(),
+                                            progressIndicatorBuilder:
+                                                (context, url, l) =>
+                                                    const LoadingImage(
+                                              icon: Icon(
+                                                LineIcons.compactDisc,
+                                                size: 120,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Padding(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 24.0),
+                                                    child: Text(
+                                                      title,
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow
+                                                          .ellipsis,
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .headlineMedium,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 5),
+                                                  Padding(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 24.0),
+                                                    child: Text(
+                                                      artist,
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow
+                                                          .ellipsis,
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .bodyLarge!
+                                                          .copyWith(
+                                                              color: Colors.grey),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            LikeButton(
+                                              name: title,
+                                              fullname: artist,
+                                              username: album,
+                                              id: id,
+                                              track: myAudio.path,
+                                              isIcon: false,
+                                              cover: cover,
+                                            ),
+                                            const SizedBox(width: 24)
+                                          ],
+                                        ),
+                                        Column(children: <Widget>[
+                                          widget.con.player
+                                              .builderRealtimePlayingInfos(
+                                                  builder: (context,
+                                                      RealtimePlayingInfos?
+                                                          infos) {
+                                            return PositionSeekWidget(
+                                              currentPosition:
+                                                  infos?.currentPosition ??
+                                                      Duration.zero,
+                                              duration: infos?.duration ??
+                                                  Duration.zero,
+                                              seekTo: (to) {
+                                                widget.con.seek(to);
+                                              },
+                                            );
+                                          }),
+                                          widget.con.player.builderLoopMode(
+                                            builder: (context, loopMode) {
+                                              return PlayerBuilder.isPlaying(
+                                                  player: widget.con.player,
+                                                  builder:
+                                                      (context, isPlaying) {
+                                                    return PlayingControls(
+                                                      loopMode: loopMode,
+                                                      isPlaying: isPlaying,
+                                                      con: widget.con,
+                                                      isPlaylist: true,
+                                                      onStop: () {
+                                                        widget.con.player
+                                                            .stop();
+                                                      },
+                                                      toggleLoop: () {
+                                                        widget.con.player
+                                                            .toggleLoop();
+                                                      },
+                                                      onPlay: () {
+                                                        widget.con.player
+                                                            .playOrPause();
+                                                      },
+                                                      onNext: () {
+                                                        widget.con.playNext();
+                                                      },
+                                                      onPrevious: () {
+                                                        widget.con.playPrevious();
+                                                      },
+                                                    );
+                                                  });
+                                            },
+                                          ),
+                                          const SizedBox(height: 16),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 26.0),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                InkWell(
+                                                  onTap: () {
+                                                    launchUrlString(
+                                                        myAudio.path);
+                                                  },
+                                                  child: const Icon(
+                                                    Icons.download_sharp,
+                                                    color: Colors.grey,
+                                                    size: 18,
+                                                  ),
+                                                ),
+                                                InkWell(
+                                                  onTap: () {
+                                                    Navigator.push(
+                                                      context,
+                                                      CupertinoPageRoute(
+                                                        builder: (context) =>
+                                                            PlayListWidget(
+                                                          audios: widget
+                                                                  .con
+                                                                  .player
+                                                                  .playlist
+                                                                  ?.audios ??
+                                                              widget.con.audios,
+                                                          con: widget.con,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                  child: const Icon(
+                                                    CupertinoIcons
+                                                        .music_note_list,
+                                                    color: Colors.grey,
+                                                    size: 18,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(height: 16),
+                                        ]),
+                                      ],
                                     ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 30),
-                            ]),
-                          ],
-                        ),
-                        const SizedBox(height: 5),
-                      ],
+                            ],
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
-              ),
               );
             } else if (snapshot.hasError) {
               return const Text("");

@@ -73,6 +73,7 @@ class _AppState extends State<App> {
                       context: context,
                       isScrollControlled: true,
                       isDismissible: false,
+
                       builder: (context) => CurrentPlayingSong(
                         con: con,
                       ),

@@ -347,6 +347,7 @@ class _PersistentTabViewState extends State<PersistentTabView> {
   bool? _isCompleted;
   bool? _isAnimating;
   late bool _sendScreenContext;
+  late VoidCallback _onControllerUpdated;
 
   @override
   void initState() {
@@ -369,7 +370,7 @@ class _PersistentTabViewState extends State<PersistentTabView> {
     _isAnimating = false;
     _sendScreenContext = false;
 
-    _controller!.addListener(() {
+    _onControllerUpdated = () {
       if (_controller!.index != _currentIndex) {
         if (widget.selectedTabScreenContext != null) {
           _sendScreenContext = true;
@@ -380,7 +381,8 @@ class _PersistentTabViewState extends State<PersistentTabView> {
           );
         }
       }
-    });
+    };
+    _controller!.addListener(_onControllerUpdated);
     if (widget.selectedTabScreenContext != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         widget.selectedTabScreenContext!(_contextList[_controller!.index]);
@@ -623,6 +625,32 @@ class _PersistentTabViewState extends State<PersistentTabView> {
                     '/9f580fc5-c252-45d0-af25-9429992db112'));
       }
     }
+  }
+
+  @override
+  void didUpdateWidget(PersistentTabView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      _controller?.removeListener(_onControllerUpdated);
+      if (oldWidget.controller == null) {
+        _controller?.dispose();
+      }
+      if (widget.controller == null) {
+        _controller = PersistentTabController(initialIndex: 0);
+      } else {
+        _controller = widget.controller;
+      }
+      _controller!.addListener(_onControllerUpdated);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.removeListener(_onControllerUpdated);
+    if (widget.controller == null) {
+      _controller?.dispose();
+    }
+    super.dispose();
   }
 }
 

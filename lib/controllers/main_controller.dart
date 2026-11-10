@@ -180,10 +180,9 @@ class MainController extends ChangeNotifier {
       }));
 
       _subscriptions.add(player.audioSessionId.listen((sessionId) {}));
-      _subscriptions
-          .add(AssetsAudioPlayer.addNotificationOpenAction((notification) {
+      AssetsAudioPlayer.addNotificationOpenAction((notification) {
         return false;
-      }));
+      });
 
       _subscriptions.add(player.current.listen((playing) async {
         if (playing == null) return;
@@ -302,12 +301,16 @@ class MainController extends ChangeNotifier {
       isNext = false;
       try {
         await player.pause();
-        await player.stop();
 
         final validIndex =
             (initial >= 0 && initial < newPlaylist.length) ? initial : 0;
         newPlaylist[validIndex] =
             await _resolveAudioStream(newPlaylist[validIndex]);
+
+        if (!_isMediaStreamUrl(newPlaylist[validIndex].path)) {
+          debugPrint('[MainController] Cannot play: stream URL could not be resolved for track ${newPlaylist[validIndex].metas.title}');
+          return;
+        }
 
         audios = newPlaylist;
         await openPlayer(newlist: newPlaylist, initial: validIndex);
@@ -340,10 +343,14 @@ class MainController extends ChangeNotifier {
     final validIndex = (index >= 0 && index < audios.length) ? index : 0;
     try {
       await player.pause();
-      await player.stop();
 
       if (!_isMediaStreamUrl(audios[validIndex].path)) {
         audios[validIndex] = await _resolveAudioStream(audios[validIndex]);
+      }
+
+      if (!_isMediaStreamUrl(audios[validIndex].path)) {
+        debugPrint('[MainController] Cannot play: stream URL could not be resolved for track ${audios[validIndex].metas.title}');
+        return;
       }
 
       await openPlayer(newlist: audios, initial: validIndex);
@@ -353,6 +360,7 @@ class MainController extends ChangeNotifier {
       debugPrint('[MainController] playSongAtIndex error: $e');
       try {
         audios[validIndex] = await _resolveAudioStream(audios[validIndex], forceRefresh: true);
+        if (!_isMediaStreamUrl(audios[validIndex].path)) return;
         await openPlayer(newlist: audios, initial: validIndex);
         await player.play();
       } catch (err) {
@@ -367,8 +375,10 @@ class MainController extends ChangeNotifier {
       final totalDuration = currentInfo.duration;
 
       Duration target = position;
-      if (totalDuration > Duration.zero && target > totalDuration) {
-        target = totalDuration;
+      if (totalDuration > Duration.zero) {
+        if (target >= totalDuration) {
+          target = totalDuration - const Duration(milliseconds: 500);
+        }
       }
       if (target < Duration.zero) {
         target = Duration.zero;
@@ -376,8 +386,24 @@ class MainController extends ChangeNotifier {
 
       final wasPlaying = player.isPlaying.value;
       await player.seek(target);
-      if (wasPlaying && !player.isPlaying.value) {
+
+      // Always explicitly resume playback if audio was playing prior to seeking
+      if (wasPlaying) {
         await player.play();
+      }
+
+      // Check after a short delay if playback is stalled or paused unexpectedly
+      await Future.delayed(const Duration(milliseconds: 400));
+      if (wasPlaying && !player.isPlaying.value) {
+        debugPrint('[MainController] Player did not resume after seek, retrying play...');
+        await player.play();
+
+        // If player is still not playing sound after retry, refresh the track stream
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (wasPlaying && !player.isPlaying.value) {
+          debugPrint('[MainController] Player still stalled after seek, refreshing track stream...');
+          await refreshCurrentTrackAndSeek(target);
+        }
       }
     } catch (e) {
       debugPrint('[MainController] seek error: $e, attempting stream refresh...');

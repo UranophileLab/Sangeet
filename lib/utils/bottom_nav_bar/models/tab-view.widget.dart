@@ -48,6 +48,12 @@ class _CustomTabViewState extends State<CustomTabView> {
   }
 
   @override
+  void dispose() {
+    _heroController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Navigator(
       key: widget.routeAndNavigatorSettings!.navigatorKey,

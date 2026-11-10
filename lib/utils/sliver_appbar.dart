@@ -292,6 +292,19 @@ class MyDelegate extends SliverPersistentHeaderDelegate {
               bottom: 10,
               right: 10,
               child: con.player.builderCurrent(builder: (context, playing) {
+                if (playing.audio.assetAudioPath.isEmpty) {
+                  return FloatingActionButton(
+                    backgroundColor: Colors.green,
+                    onPressed: () {
+                      con.playSong(con.convertToAudio(songs), 0);
+                    },
+                    child: const Icon(
+                      Icons.play_arrow,
+                      color: Colors.black,
+                      size: 35,
+                    ),
+                  );
+                }
                 Function eq = const ListEquality().equals;
                 bool isSame =
                     eq(con.player.playlist?.audios ?? [], con.convertToAudio(songs));
